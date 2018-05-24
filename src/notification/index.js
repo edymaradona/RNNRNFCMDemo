@@ -75,21 +75,23 @@ export default class NotificationComponent extends React.PureComponent {
 
     setupListeners () {
         this.notificationListener = FCM.on(FCMEvent.Notification, async (notif) => {
-            console.log('Tweedl FCM Received Notification');
+            console.log('Tweedl FCM Received Notification', notif);
             // there are two parts of notif. notif.notification contains the notification payload, notif.data contains data
             // payload
             if (notif.local_notification) {
                 // this is a local notification
                 console.log('Tweedl FCM Local Notification', notif);
             }
-            if (notif.opened_from_tray) {
-                this.navigate(notif.routeName);
+            if (notif.opened_from_tray && notif.pd && Platform.OS === 'android') {
+                console.log('Notification opened from tray:', notif.routeName, notif.pd);
+                this.navigate(JSON.parse(notif.pd));
             }
 
             if (notif.data && notif.data.notificationData) {
                 // FCM.presentLocalNotification({
                 //     ...notif.data.notificationData,
                 // });
+                console.log('The notification data is', notif.data);
             }
 
             if (notif.payloadId) await PayloadUtils.save(notif.payloadId, notif.payloadData);
